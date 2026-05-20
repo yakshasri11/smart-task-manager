@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register | TaskManager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/auth.css" />
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="brand">
+        <span class="brand-icon">📝</span>
+        <h1>TaskManager</h1>
+      </div>
+      <p class="tagline">Create your free account</p>
+
+      <div id="msg-box" class="msg-box hidden"></div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Choose a username" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Min 6 characters" />
+      </div>
+
+      <button id="register-btn" class="btn-main">Create Account</button>
+
+      <p class="alt-text">Already have an account? <a href="/login">Sign in</a></p>
+    </div>
+  </div>
+
+  <script>
+    const msgBox  = document.getElementById('msg-box');
+
+    function showMsg(text, type) {
+      msgBox.textContent = text;
+      msgBox.className   = `msg-box ${type}`;
+    }
+
+    document.getElementById('register-btn').addEventListener('click', async () => {
+      const username = document.getElementById('username').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('register-btn');
+
+      if (!username || !email || !password) {
+        showMsg('All fields are required', 'error');
+        return;
+      }
+      if (password.length < 6) {
+        showMsg('Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      btn.textContent = 'Creating account...';
+      btn.disabled    = true;
+
+      try {
+        const res  = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          showMsg('Account created! Redirecting...', 'success');
+          setTimeout(() => window.location.href = '/', 1000);
+        } else {
+          showMsg(data.error || 'Registration failed', 'error');
+          btn.textContent = 'Create Account';
+          btn.disabled    = false;
+        }
+      } catch (err) {
+        showMsg('Network error. Try again.', 'error');
+        btn.textContent = 'Create Account';
+        btn.disabled    = false;
+      }
+    });
+  </script>
+</body>
+</html>
